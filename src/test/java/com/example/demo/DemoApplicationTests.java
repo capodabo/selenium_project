@@ -3,56 +3,92 @@ package com.example.demo;
 import com.example.demo.entity.Product;
 import com.example.demo.repository.ProductRepository;
 import org.junit.jupiter.api.Test;
-import org.openqa.selenium.*;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.Rollback;
+
+import javax.transaction.Transactional;
+import java.time.Instant;
+import java.util.List;
+
 
 @SpringBootTest
 class DemoApplicationTests {
 
-	@Autowired
-	ProductRepository productRepository;
+    @Autowired
+    ProductRepository productRepository;
 
-	@Test
-	void addProduct() {
-		System.setProperty("webdriver.chrome.driver","C:\\Users\\Bestia\\IdeaProjects\\Resources\\chromedriver.exe");
+    String productName;
 
-		WebDriver driver = new ChromeDriver();
+    String priceGroup;
+    String pricePart1;
+    double productPrice;
 
-		driver.get("https://www.emag.ro/cafea-boabe-lavazza-super-crema-1-kg-8000070042025/pd/DPNCZZBBM/");
+    String priceBeforePromotionGroup;
+    String promotionPart1;
+    double priceBeforePromotion;
 
-		String name = driver.findElement(new By.ByXPath("//*[@id=\"main-container\"]/section[1]/div/div[1]/h1")).getText();
-		String priceGroup = driver.findElement(new By.ByXPath("//*[@id=\"main-container\"]/section[1]/div/div[2]/div[2]/div/div/div[2]/form/div[1]/div[1]/div/div/p")).getText();
+    String productUrl;
 
-		String sup = driver.findElement(new By.ByXPath("//*[@id=\"main-container\"]/section[1]/div/div[2]/div[2]/div/div/div[2]/form/div[1]/div[1]/div/div/p/sup")).getText();
-		String currency = driver.findElement(new By.ByXPath("//*[@id=\"main-container\"]/section[1]/div/div[2]/div[2]/div/div/div[2]/form/div[1]/div[1]/div/div/p/span")).getText();
+    @Test
+    void addProduct() {
+        System.setProperty("webdriver.chrome.driver", "C:\\Users\\Bestia\\IdeaProjects\\Resources\\chromedriver.exe");
 
-		String part1 = priceGroup.replace(sup, "").replace(currency, "").trim();
-		double price = Double.parseDouble(part1 + "." + sup);
+        WebDriver findDriver = new ChromeDriver();
+
+        findDriver.get("https://www.emag.ro/laptopuri/c?ref=bc");
+        List<WebElement> products = findDriver.findElements(By.cssSelector("#card_grid > div.card-item"));
+
+        for (WebElement prod : products) {
+            try {
+                productName = prod.findElement(By.tagName("h2")).getText();
+
+                priceGroup = prod.findElement(By.cssSelector("p.product-new-price")).getText();
+                pricePart1 = priceGroup.replace("Lei", "").replace(".", "").replace("de la", "").trim();
+                productPrice = Double.parseDouble(pricePart1) / 100;
+
+                if (prod.findElements(By.cssSelector("p.product-old-price > s")).size() > 0) {
+                    priceBeforePromotionGroup = prod.findElement(By.cssSelector("p.product-old-price > s")).getText();
+                    promotionPart1 = priceBeforePromotionGroup.replace("Lei", "").replace(".", "").trim();
+                    priceBeforePromotion = Double.parseDouble(promotionPart1) / 100;
+                }
+
+                productUrl = prod.findElement(By.cssSelector("div.card-section-mid > h2 > a")).getAttribute("href");
+
+                // Test variables
+
+                System.out.println("Number of products = " + products.size());
+                System.out.println("Product name = " + productName);
+                System.out.println("Price before promotion group = " + priceBeforePromotionGroup);
+                System.out.println("Price before promotion = " + priceBeforePromotion);
+                System.out.println("Price group = " + priceGroup);
+                System.out.println("Product price = " + productPrice);
+                System.out.println("Product URL = " + productUrl);
+                System.out.println("Product added");
+                System.out.println("");
+
+                Product product = new Product();
+                product.setProductName(productName);
+                product.setProductPrice(productPrice);
+                product.setPriceBeforePromotion(priceBeforePromotion);
+                product.setProductUrl(productUrl);
+                product.setLastUpdated(Instant.now());
+                productRepository.save(product);
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
 
 
-		// another way to do it
-
-/*		String name = driver.findElement(new By.ByXPath("//*[@id=\"main-container\"]/section[1]/div/div[1]/h1")).getText();
-		String currency = driver.findElement(new By.ByXPath("//*[@id=\"main-container\"]/section[1]/div/div[2]/div[2]/div/div/div[2]/form/div[1]/div[1]/div/div/p/span")).getText();
-		String priceGroup[] = driver.findElement(new By.ByXPath("//*[@id=\"main-container\"]/section[1]/div/div[2]/div[2]/div/div/div[2]/form/div[1]/div[1]/div/div/p")).getText().split(" ");
-		double price = Double.valueOf(priceGroup[0])/100;*/
-
-
-		// Test if variables are picked up and formatted correctly
-
-/*		System.out.println("Product = " + name);
-		System.out.println("Price = " + price);
-		System.out.println("Currency = " + currency);*/
-
-		Product product = new Product();
-		product.setProductName(name);
-		product.setPrice(price);
-		product.setCurrency(currency);
-		productRepository.save(product);
-
-
-	}
+        }
+    }
 
 }
+
+
+
+

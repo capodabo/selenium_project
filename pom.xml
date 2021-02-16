@@ -53,6 +53,10 @@
 			<artifactId>selenium-java</artifactId>
 			<version>4.0.0-alpha-6</version>
 		</dependency>
+		<dependency>
+			<groupId>org.quartz-scheduler</groupId>
+			<artifactId>quartz</artifactId>
+		</dependency>
 	</dependencies>
 
 	<build>

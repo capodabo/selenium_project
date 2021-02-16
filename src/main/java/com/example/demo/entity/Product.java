@@ -1,6 +1,7 @@
 package com.example.demo.entity;
 
 import javax.persistence.*;
+import java.time.Instant;
 
 @Entity
 public class Product {
@@ -11,11 +12,23 @@ public class Product {
 
     private Long id;
 
-    public String productName;
+    private String productName;
 
-    private double price;
+    private double productPrice;
 
-    private String currency;
+    private double priceBeforePromotion;
+
+    private String productUrl;
+
+    private Instant lastUpdated;
+
+    public Instant getLastUpdated() {
+        return lastUpdated;
+    }
+
+    public void setLastUpdated(Instant lastUpdated) {
+        this.lastUpdated = lastUpdated;
+    }
 
     public Long getId() {
         return id;
@@ -33,29 +46,38 @@ public class Product {
         this.productName = productName;
     }
 
-    public double getPrice() {
-        return price;
+    public double getProductPrice() {
+        return productPrice;
     }
 
-    public void setPrice(double price) {
-        this.price = price;
+    public void setProductPrice(double productPrice) {
+        this.productPrice = productPrice;
     }
 
-    public String getCurrency() {
-        return currency;
+    public double getPriceBeforePromotion() {
+        return priceBeforePromotion;
     }
 
-    public void setCurrency(String currency) {
-        this.currency = currency;
+    public void setPriceBeforePromotion(double priceBeforePromotion) {
+        this.priceBeforePromotion = priceBeforePromotion;
+    }
+
+    public String getProductUrl() {
+        return productUrl;
+    }
+
+    public void setProductUrl(String productUrl) {
+        this.productUrl = productUrl;
     }
 
     @Override
     public String toString() {
         return "Product{" +
                 "id=" + id +
-                ", name='" + productName + '\'' +
-                ", price='" + price + '\'' +
-                ", currency='" + currency + '\'' +
+                ", productName='" + productName + '\'' +
+                ", productPrice='" + productPrice + '\'' +
+                ", priceBeforePromotion ='" + priceBeforePromotion + '\'' +
+                ", productUrl ='" + productUrl + '\'' +
                 '}';
     }
 }
